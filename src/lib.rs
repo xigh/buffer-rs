@@ -43,7 +43,7 @@ impl<'a> Buffer<'a> {
         }
     }
 
-    pub fn alloc(self: &'a Self, sz: usize) -> Option<&'a [u8]> {
+    pub fn alloc(&'a self, sz: usize) -> Option<&'a [u8]> {
         let new = self.reserve(sz);
         if new == 0 {
             None
@@ -53,7 +53,7 @@ impl<'a> Buffer<'a> {
         }
     }
     
-    pub fn alloc_mut(self: &'a Self, sz: usize) -> Option<&'a mut [u8]> {
+    pub fn alloc_mut(&'a self, sz: usize) -> Option<&'a mut [u8]> {
         let new = self.reserve(sz);
         if new == 0 {
             None
