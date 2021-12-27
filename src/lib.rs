@@ -23,23 +23,45 @@ impl<'a> Buffer<'a> {
         self.bytes.len() - self.next.load(Ordering::Relaxed)
     }
 
-    pub fn alloc(self: &'a Self, sz: usize) -> Option<&'a mut [u8]> {
+    fn reserve(&'a self, sz: usize) -> usize {
+        if sz == 0 {
+            return 0;
+        }
         let mut old = self.next.load(Ordering::Relaxed);
         loop {
             let new = old + sz;
             if new >= self.bytes.len() {
-                return None;
+                return 0;
             }
             match self
                 .next
                 .compare_exchange_weak(old, new, Ordering::SeqCst, Ordering::Relaxed)
             {
-                Ok(_) => break,
+                Ok(_) => return new,
                 Err(new) => old = new,
             }
         }
-        let self_mut = unsafe { get_mutable_ref(self) };
-        Some(&mut self_mut.bytes[old..old + sz])
+    }
+
+    pub fn alloc(self: &'a Self, sz: usize) -> Option<&'a [u8]> {
+        let new = self.reserve(sz);
+        if new == 0 {
+            None
+        } else {
+            let old = new - sz;
+            Some(&self.bytes[old..new])
+        }
+    }
+    
+    pub fn alloc_mut(self: &'a Self, sz: usize) -> Option<&'a mut [u8]> {
+        let new = self.reserve(sz);
+        if new == 0 {
+            None
+        } else {
+            let self_mut = unsafe { get_mutable_ref(self) };
+            let old = new - sz;
+            Some(&mut self_mut.bytes[old..new])
+        }
     }
 }
 
@@ -62,7 +84,7 @@ mod tests {
         assert_eq!(buf0[0], 0);
         assert_eq!(buf0[5], 5);
 
-        let maybe_buf1 = memory.alloc(10);
+        let maybe_buf1 = memory.alloc_mut(10);
         assert_ne!(maybe_buf1, None);
         let buf1 = maybe_buf1.unwrap();
         assert_eq!(buf1.len(), 10);
