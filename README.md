@@ -27,4 +27,4 @@ fn main() {
 }
 ```
 
-![screenshot](example.png)
+![screenshot](example.png?_=1)
