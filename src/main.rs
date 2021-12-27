@@ -23,6 +23,10 @@ fn main() {
         println!("bytes2 at-0 [after=255]: {}", bytes2[0]);
     }
 
+    println!("remaining bytes: {}", memory.remaining());
+
     let bytes3 = memory.alloc(20);
     assert_eq!(None, bytes3);
+
+    println!("remaining bytes: {}", memory.remaining());
 }

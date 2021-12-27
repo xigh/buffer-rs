@@ -14,17 +14,27 @@ impl<'a> Buffer<'a> {
         }
     }
 
-    pub fn len(self: &Self) -> usize {
-        return self.bytes.len();
+    pub fn len(&self) -> usize {
+        self.bytes.len()
+    }
+
+    pub fn remaining(&self) -> usize {
+        self.bytes.len() - self.next.load(Ordering::Relaxed)
     }
 
     pub fn alloc(self: &'a Self, sz: usize) -> Option<&'a mut [u8]> {
-        let begin = self.next.fetch_add(sz, Ordering::SeqCst);
-        let end = begin + sz;
-        if end >= self.bytes.len() {
-            return None;
+        let mut old = self.next.load(Ordering::Relaxed);
+        loop {
+            let new = old + sz;
+            if new  >= self.bytes.len() {
+                return None;
+            }
+            match self.next.compare_exchange_weak(old, new, Ordering::SeqCst, Ordering::Relaxed) {
+                Ok(_) => break,
+                Err(new) => old = new,
+            }
         }
         let self_mut = unsafe { get_mutable_ref(self) };
-        Some(&mut self_mut.bytes[begin..end])
+        Some(&mut self_mut.bytes[old..old+sz])
     }
 }
