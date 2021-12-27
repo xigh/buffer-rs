@@ -2,7 +2,7 @@
 
 ```rust
 fn main() {
-    let mut bytes: [u8; 16384] = [0; 16384];
+    let mut bytes: [u8; 25] = [0; 25];
     for n in 0..bytes.len() {
         bytes[n] = (n % 255) as u8;
     }
@@ -21,6 +21,9 @@ fn main() {
         bytes2[0] = 255;
         println!("bytes2 at-0 [after=255]: {}", bytes2[0]);
     }
+
+    let bytes3 = memory.alloc(20);
+    assert_eq!(None, bytes3);
 }
 ```
 
