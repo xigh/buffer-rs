@@ -15,7 +15,7 @@ fn main() {
         println!("bytes1 at-1: {}", bytes1[1]);
     }
 
-    let bytes2 = memory.alloc(10);
+    let bytes2 = memory.alloc_mut(10);
     if let Some(bytes2) = bytes2 {
         println!("bytes2 at-0: {}", bytes2[0]);
         bytes2[0] = 255;
