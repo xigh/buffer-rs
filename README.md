@@ -23,3 +23,5 @@ fn main() {
     }
 }
 ```
+
+![screenshot](example.png)
