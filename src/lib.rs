@@ -1,6 +1,6 @@
 mod mutref;
 use mutref::get_mutable_ref;
-use std::sync::atomic::{AtomicUsize, Ordering};
+use core::sync::atomic::{AtomicUsize, Ordering};
 
 pub struct Buffer<'a> {
     bytes: &'a mut [u8],
